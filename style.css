@@ -2,7 +2,6 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-
 }
 
 body {
@@ -18,8 +17,7 @@ body {
     margin: 30px auto;
     padding: 25px;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0);
-
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
@@ -65,8 +63,8 @@ button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-col0r 0, 2s;
-
+    /* Novo:: o prof escreveu col0r com zero aqui, arrumei */
+    transition: background-color 0.2s;
 }
 
 .btn-primary {
@@ -103,9 +101,15 @@ button {
 
 table {
     width: 100%;
-    border: px solid #cbd5e1;
+    border-collapse: collapse;
+    border: 1px solid #cbd5e1;
     padding: 10px;
     text-align: center;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #cbd5e1;
 }
 
 th {
@@ -122,7 +126,6 @@ tbody tr:nth-child(even) {
     color: white;
     padding: 5px 10px;
     font-size: 12px;
-
 }
 
 .btn-remover:hover {

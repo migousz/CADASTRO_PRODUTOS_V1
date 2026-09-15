@@ -20,23 +20,27 @@
             </div>
 
             <div class="form-group">
-                <label for="nome">Preço (R$):</label>
+                <!-- Novo: -->
+                <label for="preco">Preço (R$):</label>
                 <input type="number" id="preco" step="0.01" placeholder="Ex. 3500,00" required/>
             </div>
 
             <div class="form-group">
-                <label for="nome">Quantidade:</label>
+                <!-- Novo:-->
+                <label for="quantidade">Quantidade:</label>
                 <input type="number" id="quantidade" placeholder="Ex. 5" required/>
             </div>
 
-            <button type="submit" class="btn-primary">AdicionarProduto</button>
+            <button type="submit" class="btn-primary">Adicionar Produto</button>
         </form>
 
         <!--Cabeçalho de Ações e Resumo-->
-        <div class="resumo container">
-            <h3 id="total-estoque">Total em Estoque; R$0,00</h3>
+        <!-- Novo -->
+        <div class="resumo-container">
+            <h3 id="total-estoque">Total em Estoque: R$ 0.00</h3>
             <button id="limpar-tabela" class="btn-danger">Limpar tudo</button>
         </div>
+        
         <!--Tabela de Exibição-->
         <table id="tabela-produtos">
             <thead>
@@ -55,7 +59,6 @@
     </div>
 
     <script src="script.js"></script>
-
 </body>
 
 </html>
