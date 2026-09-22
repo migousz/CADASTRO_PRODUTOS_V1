@@ -1,0 +1,151 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #0f0618;
+    color: #333;
+    padding: 20px;
+    margin: 0;
+    position: relative;
+    overflow-x: hidden;
+}
+
+body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url(la.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    filter: blur(3px);
+    z-index: -1;
+}
+
+.container {
+    max-width: 650px;
+    background-color: #fff;
+    margin: 210px auto;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px #ffe692;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #1e293b;
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+input:focus {
+    outline: none;
+    border-color: #0d0514;
+}
+
+button {
+    padding: 10px 15px;
+    font-size: 15px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #0d0514;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0d0514;
+}
+
+.btn-danger {
+    background-color: #ffec7e;
+    color: rgb(0, 0, 0);
+}
+
+.btn-danger:hover {
+    background-color: #ffec7e;
+}
+
+.resumo-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-top: 10px;
+    border-top: 2px solid #e2e8f0;
+}
+
+#total-estoque {
+    font-size: 18px;
+    color: #0f172a;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #cbd5e1;
+    padding: 10px;
+    text-align: center;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+}
+
+th {
+    background-color: #0d0514;
+    color: white;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #f8fafc;
+}
+
+.btn-remover {
+    background-color: #ffec7e;
+    color: rgb(0, 0, 0);
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.btn-remover:hover {
+    background-color: #ffec7e;
+}
