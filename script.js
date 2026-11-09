@@ -15,19 +15,22 @@ const CHAVE_ESTOQUE = "sistema_estoque_produtos";
 let listaDeProdutos = [];
 let indiceEdicao = null;
 
-// Elementos do HTML
 const formProduto = document.getElementById("formProduto");
 const campoNome = document.getElementById("nome");
 const campoPreco = document.getElementById("preco");
 const campoQuantidade = document.getElementById("quantidade");
-const campoBusca = document.getElementById("campo-busca");
+
 const btnAdicionar = document.getElementById("btnAdicionar");
 const btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
 const btnLimpar = document.getElementById("btnLimpar");
+
 const tabelaProdutos = document.getElementById("tabelaProdutos");
 const valorTotal = document.getElementById("valorTotal");
 
-// Carrega os produtos salvos no navegador
+const campoBusca = document.getElementById("campo-busca");
+const sugestoesProdutos = document.getElementById("sugestoesProdutos");
+
+// CARREGAR PRODUTOS
 function carregarProdutos() {
     try {
         const dados = localStorage.getItem(CHAVE_ESTOQUE);
@@ -36,6 +39,7 @@ function carregarProdutos() {
         listaDeProdutos = Array.isArray(produtosSalvos)
             ? produtosSalvos
             : [];
+
     } catch (erro) {
         console.error("Erro ao carregar os produtos:", erro);
         listaDeProdutos = [];
@@ -44,7 +48,7 @@ function carregarProdutos() {
     renderizarTabela();
 }
 
-// Salva os produtos no navegador
+// SALVAR PRODUTOS
 function salvarProdutos() {
     localStorage.setItem(
         CHAVE_ESTOQUE,
@@ -52,21 +56,64 @@ function salvarProdutos() {
     );
 }
 
-// Retorna somente os produtos que correspondem à pesquisa
-function obterProdutosFiltrados() {
-    const termoBusca = campoBusca.value.trim().toLowerCase();
+// BUSCAR PRODUTOS PELO NOME NO CADASTRO
+function buscarProdutosExistentes() {
+    const termo = campoNome.value.trim().toLowerCase();
 
-    return listaDeProdutos.filter(produto =>
-        produto.nome.toLowerCase().includes(termoBusca)
-    );
+    sugestoesProdutos.innerHTML = "";
+
+    if (termo === "" || indiceEdicao !== null) {
+        sugestoesProdutos.classList.remove("ativo");
+        return;
+    }
+
+    const produtosEncontrados = listaDeProdutos
+        .map((produto, index) => ({ produto, index }))
+        .filter(item =>
+            item.produto.nome.toLowerCase().includes(termo)
+        );
+
+    if (produtosEncontrados.length === 0) {
+        sugestoesProdutos.classList.remove("ativo");
+        return;
+    }
+
+    produtosEncontrados.forEach(item => {
+        const botao = document.createElement("button");
+
+        botao.type = "button";
+        botao.className = "sugestao-item";
+
+        const nome = document.createElement("strong");
+        nome.textContent = item.produto.nome;
+
+        const detalhes = document.createElement("span");
+        detalhes.textContent =
+            `Preço: ${Number(item.produto.preco).toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL"
+            })} | Quantidade: ${item.produto.quantidade}`;
+
+        botao.append(nome, detalhes);
+
+        botao.addEventListener("click", function() {
+            prepararEdicao(item.index);
+            sugestoesProdutos.innerHTML = "";
+            sugestoesProdutos.classList.remove("ativo");
+        });
+
+        sugestoesProdutos.appendChild(botao);
+    });
+
+    sugestoesProdutos.classList.add("ativo");
 }
 
-// Pesquisa os produtos enquanto o usuário digita
-campoBusca.addEventListener("input", function() {
-    renderizarTabela();
+// ATUALIZAR SUGESTÕES ENQUANTO DIGITA
+campoNome.addEventListener("input", function() {
+    buscarProdutosExistentes();
 });
 
-// Valida, cadastra ou atualiza o produto
+// CADASTRAR OU ATUALIZAR PRODUTO
 formProduto.addEventListener("submit", function(event) {
     event.preventDefault();
 
@@ -74,14 +121,12 @@ formProduto.addEventListener("submit", function(event) {
     const preco = Number(campoPreco.value);
     const quantidade = Number(campoQuantidade.value);
 
-    // Validação do nome
     if (!nome) {
         alert("Por favor, informe um nome válido para o produto.");
         campoNome.focus();
         return;
     }
 
-    // Validação do preço e da quantidade
     if (
         campoPreco.value.trim() === "" ||
         !Number.isFinite(preco) ||
@@ -98,26 +143,35 @@ formProduto.addEventListener("submit", function(event) {
 
     const novoProduto = new Produto(nome, preco, quantidade);
 
-    // Inclusão ou atualização
     if (indiceEdicao === null) {
+        // VERIFICA SE O PRODUTO JÁ EXISTE
+        const produtoExistente = listaDeProdutos.findIndex(produto =>
+            produto.nome.trim().toLowerCase() === nome.toLowerCase()
+        );
+
+        if (produtoExistente !== -1) {
+            alert(
+                "Esse produto já está cadastrado. Selecione-o nas sugestões para editar."
+            );
+
+            prepararEdicao(produtoExistente);
+            return;
+        }
+
         listaDeProdutos.push(novoProduto);
         alert("Produto cadastrado com sucesso!");
+
     } else {
         listaDeProdutos[indiceEdicao] = novoProduto;
         alert("Produto atualizado com sucesso!");
     }
 
     salvarProdutos();
-
-    indiceEdicao = null;
-    formProduto.reset();
-    btnAdicionar.textContent = "Adicionar produto";
-    btnCancelarEdicao.hidden = true;
-
+    cancelarEdicao();
     renderizarTabela();
 });
 
-// Prepara o formulário para editar um produto
+// PREPARAR EDIÇÃO
 function prepararEdicao(index) {
     const produto = listaDeProdutos[index];
 
@@ -131,21 +185,32 @@ function prepararEdicao(index) {
     campoQuantidade.value = produto.quantidade;
 
     indiceEdicao = index;
-    btnAdicionar.textContent = "Salvar Alterações";
+
+    btnAdicionar.textContent = "Salvar alterações";
     btnCancelarEdicao.hidden = false;
 
-    campoNome.focus();
+    sugestoesProdutos.innerHTML = "";
+    sugestoesProdutos.classList.remove("ativo");
+
+    campoPreco.focus();
 }
 
-// Cancela o modo de edição
-btnCancelarEdicao.addEventListener("click", function() {
+// CANCELAR EDIÇÃO
+function cancelarEdicao() {
     indiceEdicao = null;
+
     formProduto.reset();
+
     btnAdicionar.textContent = "Adicionar produto";
     btnCancelarEdicao.hidden = true;
-});
 
-// Remove um produto
+    sugestoesProdutos.innerHTML = "";
+    sugestoesProdutos.classList.remove("ativo");
+}
+
+btnCancelarEdicao.addEventListener("click", cancelarEdicao);
+
+// REMOVER PRODUTO
 function removerProduto(index) {
     if (!listaDeProdutos[index]) {
         return;
@@ -161,12 +226,8 @@ function removerProduto(index) {
 
     listaDeProdutos.splice(index, 1);
 
-    // Ajusta o índice se um produto for removido durante a edição
     if (indiceEdicao === index) {
-        indiceEdicao = null;
-        formProduto.reset();
-        btnAdicionar.textContent = "Adicionar produto";
-        btnCancelarEdicao.hidden = true;
+        cancelarEdicao();
     } else if (indiceEdicao !== null && indiceEdicao > index) {
         indiceEdicao--;
     }
@@ -175,11 +236,24 @@ function removerProduto(index) {
     renderizarTabela();
 }
 
-// Calcula o total considerando apenas os produtos visíveis
+// FILTRAR PRODUTOS DA TABELA
+function obterProdutosFiltrados() {
+    const termoBusca = campoBusca.value.trim().toLowerCase();
+
+    return listaDeProdutos
+        .map((produto, index) => ({ produto, index }))
+        .filter(item =>
+            item.produto.nome.toLowerCase().includes(termoBusca)
+        );
+}
+
+// ATUALIZAR VALOR TOTAL DOS PRODUTOS VISÍVEIS
 function atualizarValorTotal(produtosVisiveis) {
     const total = produtosVisiveis.reduce(
-        (soma, produto) =>
-            soma + Number(produto.preco) * Number(produto.quantidade),
+        (soma, item) =>
+            soma +
+            Number(item.produto.preco) *
+            Number(item.produto.quantidade),
         0
     );
 
@@ -189,7 +263,7 @@ function atualizarValorTotal(produtosVisiveis) {
     });
 }
 
-// Renderiza a tabela com os produtos filtrados
+// RENDERIZAR TABELA
 function renderizarTabela() {
     tabelaProdutos.innerHTML = "";
 
@@ -201,30 +275,32 @@ function renderizarTabela() {
 
         celula.colSpan = 5;
 
-        if (listaDeProdutos.length === 0) {
-            celula.textContent = "Nenhum produto cadastrado ainda.";
-        } else {
-            celula.textContent = "Nenhum produto encontrado.";
-        }
+        celula.textContent = listaDeProdutos.length === 0
+            ? "Nenhum produto cadastrado ainda."
+            : "Nenhum produto encontrado.";
 
         celula.className = "mensagem-vazia";
 
         linha.appendChild(celula);
         tabelaProdutos.appendChild(linha);
-    } else {
-        produtosVisiveis.forEach(produto => {
-            const linha = document.createElement("tr");
 
-            // Recupera a posição original na lista principal
-            const index = listaDeProdutos.indexOf(produto);
+    } else {
+        produtosVisiveis.forEach(item => {
+            const produto = item.produto;
+            const index = item.index;
+
+            const linha = document.createElement("tr");
 
             const valores = [
                 produto.nome,
+
                 Number(produto.preco).toLocaleString("pt-BR", {
                     style: "currency",
                     currency: "BRL"
                 }),
+
                 produto.quantidade,
+
                 (
                     Number(produto.preco) *
                     Number(produto.quantidade)
@@ -262,6 +338,7 @@ function renderizarTabela() {
 
             celulaAcoes.append(btnEditar, btnRemover);
             linha.appendChild(celulaAcoes);
+
             tabelaProdutos.appendChild(linha);
         });
     }
@@ -269,7 +346,12 @@ function renderizarTabela() {
     atualizarValorTotal(produtosVisiveis);
 }
 
-// Limpa todos os produtos cadastrados
+// BUSCA EM TEMPO REAL NA TABELA
+campoBusca.addEventListener("input", function() {
+    renderizarTabela();
+});
+
+// LIMPAR ESTOQUE
 btnLimpar.addEventListener("click", function() {
     if (listaDeProdutos.length === 0) {
         alert("O estoque já está vazio.");
@@ -278,17 +360,15 @@ btnLimpar.addEventListener("click", function() {
 
     if (confirm("Tem certeza de que deseja limpar todo o estoque?")) {
         listaDeProdutos = [];
-        indiceEdicao = null;
 
-        formProduto.reset();
+        cancelarEdicao();
+
         campoBusca.value = "";
-        btnAdicionar.textContent = "Adicionar produto";
-        btnCancelarEdicao.hidden = true;
 
         salvarProdutos();
         renderizarTabela();
     }
 });
 
-// Inicialização do sistema
+// INICIAR SISTEMA
 carregarProdutos();

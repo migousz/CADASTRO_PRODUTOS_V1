@@ -19,25 +19,46 @@
 
         <section class="painel">
             <h2>Cadastro de produtos</h2>
-            <p class="descricao">Adicione ou atualize os produtos do estoque.</p>
+            <p class="descricao">
+                Adicione produtos ou encontre itens já cadastrados para editá-los.
+            </p>
 
             <form id="formProduto" novalidate>
-                <div class="campo">
+                <div class="campo campo-nome">
                     <label for="nome">Nome do produto</label>
-                    <input type="text" id="nome" placeholder="Ex.: Camiseta" required>
+                    <input
+                        type="text"
+                        id="nome"
+                        placeholder="Digite o nome do produto..."
+                        autocomplete="off"
+                        required
+                    >
+                    <div id="sugestoesProdutos" class="sugestoes-produtos"></div>
                 </div>
 
                 <div class="linha-campos">
                     <div class="campo">
                         <label for="preco">Preço unitário (R$)</label>
-                        <input type="number" id="preco" step="0.01" min="0.01"
-                            placeholder="0,00" required>
+                        <input
+                            type="number"
+                            id="preco"
+                            step="0.01"
+                            min="0.01"
+                            placeholder="0,00"
+                            required
+                        >
                     </div>
 
                     <div class="campo">
                         <label for="quantidade">Quantidade</label>
-                        <input type="number" id="quantidade" step="1" min="1"
-                            placeholder="Ex.: 10" required>
+                        <input
+                            type="number"
+                            id="quantidade"
+                            step="1"
+                            min="1"
+                            placeholder="Ex.: 10"
+                            required
+                        >
                     </div>
                 </div>
 
@@ -45,8 +66,13 @@
                     <button type="submit" id="btnAdicionar" class="btn-principal">
                         Adicionar produto
                     </button>
-                    <button type="button" id="btnCancelarEdicao"
-                        class="btn-secundario" hidden>
+
+                    <button
+                        type="button"
+                        id="btnCancelarEdicao"
+                        class="btn-secundario"
+                        hidden
+                    >
                         Cancelar edição
                     </button>
                 </div>
@@ -65,19 +91,19 @@
                 </button>
             </div>
 
-            <div class="resumo">
-                <span>Valor total dos produtos visíveis</span>
-                <strong id="valorTotal">R$ 0,00</strong>
-            </div>
-
             <div class="campo campo-busca">
-                <label for="campo-busca">Pesquisar produto</label>
+                <label for="campo-busca">Buscar no estoque</label>
                 <input
                     type="search"
                     id="campo-busca"
-                    placeholder="Digite o nome do produto..."
+                    placeholder="Pesquise um produto..."
                     autocomplete="off"
                 >
+            </div>
+
+            <div class="resumo">
+                <span>Valor total dos produtos exibidos</span>
+                <strong id="valorTotal">R$ 0,00</strong>
             </div>
 
             <div class="tabela-container">

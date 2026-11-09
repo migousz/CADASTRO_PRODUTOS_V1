@@ -113,6 +113,63 @@ input:focus {
     box-shadow: 0 0 0 3px #4c347d18;
 }
 
+/* SUGESTÕES DE PRODUTOS */
+.campo-nome {
+    position: relative;
+}
+
+.sugestoes-produtos {
+    display: none;
+    position: absolute;
+    top: calc(100% - 17px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: white;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px #30204f18;
+    overflow: hidden;
+}
+
+.sugestoes-produtos.ativo {
+    display: block;
+}
+
+.sugestao-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 0;
+    background: white;
+    color: var(--texto);
+    text-align: left;
+    border-bottom: 1px solid var(--borda);
+}
+
+.sugestao-item:last-child {
+    border-bottom: none;
+}
+
+.sugestao-item:hover {
+    background: #f6f2fc;
+    transform: none;
+}
+
+.sugestao-item strong {
+    color: var(--roxo);
+    font-size: 14px;
+}
+
+.sugestao-item span {
+    color: var(--cinza);
+    font-size: 12px;
+    font-weight: 400;
+}
+
 .linha-campos {
     display: flex;
     gap: 18px;
@@ -171,6 +228,10 @@ button:hover {
     margin-bottom: 0;
 }
 
+.campo-busca {
+    margin-top: 20px;
+}
+
 .resumo {
     display: flex;
     justify-content: space-between;
@@ -193,22 +254,6 @@ button:hover {
     font-size: 23px;
 }
 
-/* Campo de pesquisa da V4 */
-.campo-busca {
-    margin-bottom: 20px;
-}
-
-.campo-busca input {
-    background: #fdfcff;
-    border: 1px solid #dcd7e8;
-}
-
-.campo-busca input:focus {
-    border-color: var(--roxo);
-    box-shadow: 0 0 0 3px #4c347d18;
-}
-
-/* Área da tabela */
 .tabela-container {
     width: 100%;
     overflow-x: auto;
@@ -243,12 +288,10 @@ tbody tr:hover {
     background: #fbfaff;
 }
 
-/* Mensagem quando não há produtos encontrados */
 .mensagem-vazia {
     text-align: center;
-    color: #777385;
+    color: var(--cinza);
     padding: 25px;
-    font-size: 14px;
 }
 
 .btn-editar {
