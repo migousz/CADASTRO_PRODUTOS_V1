@@ -15,7 +15,9 @@ const CHAVE_ESTOQUE = "sistema_estoque_produtos";
 let listaDeProdutos = [];
 let indiceEdicao = null;
 
+// ELEMENTOS HTML
 const formProduto = document.getElementById("formProduto");
+
 const campoNome = document.getElementById("nome");
 const campoPreco = document.getElementById("preco");
 const campoQuantidade = document.getElementById("quantidade");
@@ -29,6 +31,7 @@ const valorTotal = document.getElementById("valorTotal");
 
 const campoBusca = document.getElementById("campo-busca");
 const sugestoesProdutos = document.getElementById("sugestoesProdutos");
+
 
 // CARREGAR PRODUTOS
 function carregarProdutos() {
@@ -48,6 +51,7 @@ function carregarProdutos() {
     renderizarTabela();
 }
 
+
 // SALVAR PRODUTOS
 function salvarProdutos() {
     localStorage.setItem(
@@ -56,7 +60,8 @@ function salvarProdutos() {
     );
 }
 
-// BUSCAR PRODUTOS PELO NOME NO CADASTRO
+
+// BUSCAR PRODUTOS EXISTENTES PELO NOME
 function buscarProdutosExistentes() {
     const termo = campoNome.value.trim().toLowerCase();
 
@@ -88,6 +93,7 @@ function buscarProdutosExistentes() {
         nome.textContent = item.produto.nome;
 
         const detalhes = document.createElement("span");
+
         detalhes.textContent =
             `Preço: ${Number(item.produto.preco).toLocaleString("pt-BR", {
                 style: "currency",
@@ -98,6 +104,7 @@ function buscarProdutosExistentes() {
 
         botao.addEventListener("click", function() {
             prepararEdicao(item.index);
+
             sugestoesProdutos.innerHTML = "";
             sugestoesProdutos.classList.remove("ativo");
         });
@@ -108,10 +115,12 @@ function buscarProdutosExistentes() {
     sugestoesProdutos.classList.add("ativo");
 }
 
+
 // ATUALIZAR SUGESTÕES ENQUANTO DIGITA
 campoNome.addEventListener("input", function() {
     buscarProdutosExistentes();
 });
+
 
 // CADASTRAR OU ATUALIZAR PRODUTO
 formProduto.addEventListener("submit", function(event) {
@@ -121,12 +130,14 @@ formProduto.addEventListener("submit", function(event) {
     const preco = Number(campoPreco.value);
     const quantidade = Number(campoQuantidade.value);
 
+    // VALIDAR NOME
     if (!nome) {
         alert("Por favor, informe um nome válido para o produto.");
         campoNome.focus();
         return;
     }
 
+    // VALIDAR PREÇO E QUANTIDADE
     if (
         campoPreco.value.trim() === "" ||
         !Number.isFinite(preco) ||
@@ -143,8 +154,10 @@ formProduto.addEventListener("submit", function(event) {
 
     const novoProduto = new Produto(nome, preco, quantidade);
 
+    // MODO CADASTRO
     if (indiceEdicao === null) {
-        // VERIFICA SE O PRODUTO JÁ EXISTE
+
+        // VERIFICAR SE O PRODUTO JÁ EXISTE
         const produtoExistente = listaDeProdutos.findIndex(produto =>
             produto.nome.trim().toLowerCase() === nome.toLowerCase()
         );
@@ -159,17 +172,23 @@ formProduto.addEventListener("submit", function(event) {
         }
 
         listaDeProdutos.push(novoProduto);
+
         alert("Produto cadastrado com sucesso!");
 
     } else {
+
+        // MODO EDIÇÃO
         listaDeProdutos[indiceEdicao] = novoProduto;
+
         alert("Produto atualizado com sucesso!");
     }
 
     salvarProdutos();
+
     cancelarEdicao();
     renderizarTabela();
 });
+
 
 // PREPARAR EDIÇÃO
 function prepararEdicao(index) {
@@ -180,10 +199,12 @@ function prepararEdicao(index) {
         return;
     }
 
+    // PREENCHER CAMPOS COM OS DADOS EXISTENTES
     campoNome.value = produto.nome;
     campoPreco.value = produto.preco;
     campoQuantidade.value = produto.quantidade;
 
+    // ATIVAR MODO EDIÇÃO
     indiceEdicao = index;
 
     btnAdicionar.textContent = "Salvar alterações";
@@ -194,6 +215,7 @@ function prepararEdicao(index) {
 
     campoPreco.focus();
 }
+
 
 // CANCELAR EDIÇÃO
 function cancelarEdicao() {
@@ -208,7 +230,12 @@ function cancelarEdicao() {
     sugestoesProdutos.classList.remove("ativo");
 }
 
-btnCancelarEdicao.addEventListener("click", cancelarEdicao);
+
+// EVENTO DO BOTÃO CANCELAR
+btnCancelarEdicao.addEventListener("click", function() {
+    cancelarEdicao();
+});
+
 
 // REMOVER PRODUTO
 function removerProduto(index) {
@@ -226,8 +253,10 @@ function removerProduto(index) {
 
     listaDeProdutos.splice(index, 1);
 
+    // AJUSTAR MODO DE EDIÇÃO
     if (indiceEdicao === index) {
         cancelarEdicao();
+
     } else if (indiceEdicao !== null && indiceEdicao > index) {
         indiceEdicao--;
     }
@@ -235,6 +264,7 @@ function removerProduto(index) {
     salvarProdutos();
     renderizarTabela();
 }
+
 
 // FILTRAR PRODUTOS DA TABELA
 function obterProdutosFiltrados() {
@@ -246,6 +276,7 @@ function obterProdutosFiltrados() {
             item.produto.nome.toLowerCase().includes(termoBusca)
         );
 }
+
 
 // ATUALIZAR VALOR TOTAL DOS PRODUTOS VISÍVEIS
 function atualizarValorTotal(produtosVisiveis) {
@@ -263,12 +294,14 @@ function atualizarValorTotal(produtosVisiveis) {
     });
 }
 
+
 // RENDERIZAR TABELA
 function renderizarTabela() {
     tabelaProdutos.innerHTML = "";
 
     const produtosVisiveis = obterProdutosFiltrados();
 
+    // VERIFICAR SE EXISTEM PRODUTOS
     if (produtosVisiveis.length === 0) {
         const linha = document.createElement("tr");
         const celula = document.createElement("td");
@@ -285,6 +318,8 @@ function renderizarTabela() {
         tabelaProdutos.appendChild(linha);
 
     } else {
+
+        // MOSTRAR PRODUTOS FILTRADOS
         produtosVisiveis.forEach(item => {
             const produto = item.produto;
             const index = item.index;
@@ -310,15 +345,21 @@ function renderizarTabela() {
                 })
             ];
 
+            // CRIAR CÉLULAS
             valores.forEach(valor => {
                 const celula = document.createElement("td");
+
                 celula.textContent = valor;
+
                 linha.appendChild(celula);
             });
 
+            // CÉLULA DE AÇÕES
             const celulaAcoes = document.createElement("td");
 
+            // BOTÃO EDITAR
             const btnEditar = document.createElement("button");
+
             btnEditar.type = "button";
             btnEditar.textContent = "Editar";
             btnEditar.className = "btn-editar";
@@ -327,7 +368,9 @@ function renderizarTabela() {
                 prepararEdicao(index);
             });
 
+            // BOTÃO REMOVER
             const btnRemover = document.createElement("button");
+
             btnRemover.type = "button";
             btnRemover.textContent = "Remover";
             btnRemover.className = "btn-remover";
@@ -337,21 +380,25 @@ function renderizarTabela() {
             });
 
             celulaAcoes.append(btnEditar, btnRemover);
+
             linha.appendChild(celulaAcoes);
 
             tabelaProdutos.appendChild(linha);
         });
     }
 
+    // ATUALIZAR TOTAL
     atualizarValorTotal(produtosVisiveis);
 }
+
 
 // BUSCA EM TEMPO REAL NA TABELA
 campoBusca.addEventListener("input", function() {
     renderizarTabela();
 });
 
-// LIMPAR ESTOQUE
+
+// LIMPAR TODO O ESTOQUE
 btnLimpar.addEventListener("click", function() {
     if (listaDeProdutos.length === 0) {
         alert("O estoque já está vazio.");
@@ -359,6 +406,7 @@ btnLimpar.addEventListener("click", function() {
     }
 
     if (confirm("Tem certeza de que deseja limpar todo o estoque?")) {
+
         listaDeProdutos = [];
 
         cancelarEdicao();
@@ -369,6 +417,7 @@ btnLimpar.addEventListener("click", function() {
         renderizarTabela();
     }
 });
+
 
 // INICIAR SISTEMA
 carregarProdutos();

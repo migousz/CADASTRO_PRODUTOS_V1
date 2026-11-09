@@ -8,24 +8,46 @@
     <script src="script.js" defer></script>
 </head>
 <body>
+
+    <!-- IMAGENS NAS LATERAIS -->
+    <div class="imagens-laterais">
+        <img
+            src="coringa.png"
+            alt="Coringa"
+            class="imagem-lateral imagem-esquerda"
+        >
+
+        <img
+            src="azao.png"
+            alt="Azão"
+            class="imagem-lateral imagem-direita"
+        >
+    </div>
+
     <main class="container">
+
         <header class="cabecalho">
             <div class="logo">NT</div>
+
             <div>
                 <h1>Nova Texas</h1>
                 <p>Controle de estoque e produtos</p>
             </div>
         </header>
 
+        <!-- CADASTRO DE PRODUTOS -->
         <section class="painel">
             <h2>Cadastro de produtos</h2>
+
             <p class="descricao">
                 Adicione produtos ou encontre itens já cadastrados para editá-los.
             </p>
 
             <form id="formProduto" novalidate>
+
                 <div class="campo campo-nome">
                     <label for="nome">Nome do produto</label>
+
                     <input
                         type="text"
                         id="nome"
@@ -33,12 +55,18 @@
                         autocomplete="off"
                         required
                     >
-                    <div id="sugestoesProdutos" class="sugestoes-produtos"></div>
+
+                    <div
+                        id="sugestoesProdutos"
+                        class="sugestoes-produtos"
+                    ></div>
                 </div>
 
                 <div class="linha-campos">
+
                     <div class="campo">
                         <label for="preco">Preço unitário (R$)</label>
+
                         <input
                             type="number"
                             id="preco"
@@ -51,6 +79,7 @@
 
                     <div class="campo">
                         <label for="quantidade">Quantidade</label>
+
                         <input
                             type="number"
                             id="quantidade"
@@ -60,10 +89,16 @@
                             required
                         >
                     </div>
+
                 </div>
 
                 <div class="botoes-form">
-                    <button type="submit" id="btnAdicionar" class="btn-principal">
+
+                    <button
+                        type="submit"
+                        id="btnAdicionar"
+                        class="btn-principal"
+                    >
                         Adicionar produto
                     </button>
 
@@ -75,39 +110,66 @@
                     >
                         Cancelar edição
                     </button>
+
                 </div>
+
             </form>
         </section>
 
+        <!-- ESTOQUE -->
         <section class="painel estoque">
+
             <div class="topo-estoque">
+
                 <div>
                     <h2>Estoque de produtos</h2>
-                    <p class="descricao">Confira os itens cadastrados.</p>
+                    <p class="descricao">
+                        Confira os itens cadastrados.
+                    </p>
                 </div>
 
-                <button id="btnLimpar" class="btn-limpar" type="button">
+                <button
+                    id="btnLimpar"
+                    class="btn-limpar"
+                    type="button"
+                >
                     Limpar tudo
                 </button>
+
             </div>
 
+            <!-- BUSCA NA TABELA -->
             <div class="campo campo-busca">
-                <label for="campo-busca">Buscar no estoque</label>
+
+                <label for="campo-busca">
+                    Buscar no estoque
+                </label>
+
                 <input
                     type="search"
                     id="campo-busca"
                     placeholder="Pesquise um produto..."
                     autocomplete="off"
                 >
+
             </div>
 
+            <!-- VALOR TOTAL -->
             <div class="resumo">
-                <span>Valor total dos produtos exibidos</span>
+
+                <span>
+                    Valor total dos produtos exibidos
+                </span>
+
                 <strong id="valorTotal">R$ 0,00</strong>
+
             </div>
 
+            <!-- TABELA -->
             <div class="tabela-container">
+
                 <table>
+
                     <thead>
                         <tr>
                             <th>Produto</th>
@@ -117,12 +179,20 @@
                             <th>Ações</th>
                         </tr>
                     </thead>
+
                     <tbody id="tabelaProdutos"></tbody>
+
                 </table>
+
             </div>
+
         </section>
 
-        <footer>Nova Texas · Sistema de controle de estoque</footer>
+        <footer>
+            Nova Texas · Sistema de controle de estoque
+        </footer>
+
     </main>
+
 </body>
 </html>
