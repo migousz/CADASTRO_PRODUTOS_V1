@@ -11,28 +11,28 @@
 
     <!-- IMAGENS NAS LATERAIS -->
     <div class="imagens-laterais">
-        <img
-            src="coringa.png"
-            alt="Coringa"
-            class="imagem-lateral imagem-esquerda"
-        >
+        <img src="coringa.png" alt="Coringa"
+             class="imagem-lateral imagem-esquerda">
 
-        <img
-            src="azao.png"
-            alt="Azão"
-            class="imagem-lateral imagem-direita"
-        >
+        <img src="azao.png" alt="Azão"
+             class="imagem-lateral imagem-direita">
     </div>
 
     <main class="container">
 
+        <!-- CABEÇALHO -->
         <header class="cabecalho">
             <div class="logo">NT</div>
 
-            <div>
+            <div class="titulo-cabecalho">
                 <h1>Nova Texas</h1>
                 <p>Controle de estoque e produtos</p>
             </div>
+
+            <button type="button" id="btnBootstrap"
+                    class="btn-bootstrap">
+                Conceito Bootstrap
+            </button>
         </header>
 
         <!-- CADASTRO DE PRODUTOS -->
@@ -56,10 +56,8 @@
                         required
                     >
 
-                    <div
-                        id="sugestoesProdutos"
-                        class="sugestoes-produtos"
-                    ></div>
+                    <div id="sugestoesProdutos"
+                         class="sugestoes-produtos"></div>
                 </div>
 
                 <div class="linha-campos">
@@ -92,22 +90,24 @@
 
                 </div>
 
+                <!-- MENSAGENS INLINE -->
+                <div id="mensagem-erro"
+                     class="mensagem-formulario"
+                     role="status"
+                     aria-live="polite"></div>
+
                 <div class="botoes-form">
 
-                    <button
-                        type="submit"
-                        id="btnAdicionar"
-                        class="btn-principal"
-                    >
+                    <button type="submit"
+                            id="btnAdicionar"
+                            class="btn-principal">
                         Adicionar produto
                     </button>
 
-                    <button
-                        type="button"
-                        id="btnCancelarEdicao"
-                        class="btn-secundario"
-                        hidden
-                    >
+                    <button type="button"
+                            id="btnCancelarEdicao"
+                            class="btn-secundario"
+                            hidden>
                         Cancelar edição
                     </button>
 
@@ -120,7 +120,6 @@
         <section class="painel estoque">
 
             <div class="topo-estoque">
-
                 <div>
                     <h2>Estoque de produtos</h2>
                     <p class="descricao">
@@ -128,22 +127,16 @@
                     </p>
                 </div>
 
-                <button
-                    id="btnLimpar"
-                    class="btn-limpar"
-                    type="button"
-                >
+                <button id="btnLimpar"
+                        class="btn-limpar"
+                        type="button">
                     Limpar tudo
                 </button>
-
             </div>
 
             <!-- BUSCA NA TABELA -->
             <div class="campo campo-busca">
-
-                <label for="campo-busca">
-                    Buscar no estoque
-                </label>
+                <label for="campo-busca">Buscar no estoque</label>
 
                 <input
                     type="search"
@@ -151,25 +144,17 @@
                     placeholder="Pesquise um produto..."
                     autocomplete="off"
                 >
-
             </div>
 
             <!-- VALOR TOTAL -->
             <div class="resumo">
-
-                <span>
-                    Valor total dos produtos exibidos
-                </span>
-
+                <span>Valor total dos produtos exibidos</span>
                 <strong id="valorTotal">R$ 0,00</strong>
-
             </div>
 
             <!-- TABELA -->
             <div class="tabela-container">
-
                 <table>
-
                     <thead>
                         <tr>
                             <th>Produto</th>
@@ -181,9 +166,7 @@
                     </thead>
 
                     <tbody id="tabelaProdutos"></tbody>
-
                 </table>
-
             </div>
 
         </section>
@@ -193,6 +176,44 @@
         </footer>
 
     </main>
+
+    <!-- MODAL DE CONFIRMAÇÃO E CONCEITO BOOTSTRAP -->
+    <div id="modalOverlay" class="modal-overlay"
+         aria-hidden="true">
+
+        <div class="modal-conteudo"
+             role="dialog"
+             aria-modal="true"
+             aria-labelledby="modalTitulo"
+             aria-describedby="modalTexto">
+
+            <div class="modal-cabecalho">
+                <div class="modal-icone" id="modalIcone">!</div>
+                <h2 id="modalTitulo">Confirmar ação</h2>
+            </div>
+
+            <p id="modalTexto" class="modal-texto">
+                Deseja realmente continuar?
+            </p>
+
+            <div class="modal-botoes">
+
+                <button type="button"
+                        id="btnModalCancelar"
+                        class="btn-secundario">
+                    Cancelar
+                </button>
+
+                <button type="button"
+                        id="btnModalConfirmar"
+                        class="btn-modal-confirmar">
+                    Confirmar
+                </button>
+
+            </div>
+
+        </div>
+    </div>
 
 </body>
 </html>

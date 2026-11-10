@@ -14,6 +14,7 @@ const CHAVE_ESTOQUE = "sistema_estoque_produtos";
 
 let listaDeProdutos = [];
 let indiceEdicao = null;
+let acaoPendente = null;
 
 // ELEMENTOS HTML
 const formProduto = document.getElementById("formProduto");
@@ -25,12 +26,51 @@ const campoQuantidade = document.getElementById("quantidade");
 const btnAdicionar = document.getElementById("btnAdicionar");
 const btnCancelarEdicao = document.getElementById("btnCancelarEdicao");
 const btnLimpar = document.getElementById("btnLimpar");
+const btnBootstrap = document.getElementById("btnBootstrap");
 
 const tabelaProdutos = document.getElementById("tabelaProdutos");
 const valorTotal = document.getElementById("valorTotal");
 
 const campoBusca = document.getElementById("campo-busca");
 const sugestoesProdutos = document.getElementById("sugestoesProdutos");
+const mensagemFormulario = document.getElementById("mensagem-erro");
+
+// ELEMENTOS DO MODAL
+const modalOverlay = document.getElementById("modalOverlay");
+const modalTitulo = document.getElementById("modalTitulo");
+const modalTexto = document.getElementById("modalTexto");
+const modalIcone = document.getElementById("modalIcone");
+
+const btnModalCancelar = document.getElementById("btnModalCancelar");
+const btnModalConfirmar = document.getElementById("btnModalConfirmar");
+
+
+// FORMATAR VALORES EM REAIS
+function formatarMoeda(valor) {
+    return Number(valor).toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
+}
+
+
+// MOSTRAR MENSAGENS NO FORMULÁRIO
+function mostrarMensagem(texto, tipo = "erro") {
+    mensagemFormulario.textContent = texto;
+
+    mensagemFormulario.className =
+        `mensagem-formulario mensagem-${tipo}`;
+
+    mensagemFormulario.style.display = "block";
+}
+
+
+// ESCONDER MENSAGEM
+function esconderMensagem() {
+    mensagemFormulario.textContent = "";
+    mensagemFormulario.className = "mensagem-formulario";
+    mensagemFormulario.style.display = "none";
+}
 
 
 // CARREGAR PRODUTOS
@@ -44,7 +84,7 @@ function carregarProdutos() {
             : [];
 
     } catch (erro) {
-        console.error("Erro ao carregar os produtos:", erro);
+        console.error("Erro ao carregar produtos:", erro);
         listaDeProdutos = [];
     }
 
@@ -54,10 +94,18 @@ function carregarProdutos() {
 
 // SALVAR PRODUTOS
 function salvarProdutos() {
-    localStorage.setItem(
-        CHAVE_ESTOQUE,
-        JSON.stringify(listaDeProdutos)
-    );
+    try {
+        localStorage.setItem(
+            CHAVE_ESTOQUE,
+            JSON.stringify(listaDeProdutos)
+        );
+    } catch (erro) {
+        console.error("Erro ao salvar produtos:", erro);
+        mostrarMensagem(
+            "Não foi possível salvar os dados no navegador.",
+            "erro"
+        );
+    }
 }
 
 
@@ -95,10 +143,8 @@ function buscarProdutosExistentes() {
         const detalhes = document.createElement("span");
 
         detalhes.textContent =
-            `Preço: ${Number(item.produto.preco).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL"
-            })} | Quantidade: ${item.produto.quantidade}`;
+            `Preço: ${formatarMoeda(item.produto.preco)} | ` +
+            `Quantidade: ${item.produto.quantidade}`;
 
         botao.append(nome, detalhes);
 
@@ -118,7 +164,16 @@ function buscarProdutosExistentes() {
 
 // ATUALIZAR SUGESTÕES ENQUANTO DIGITA
 campoNome.addEventListener("input", function() {
+    esconderMensagem();
     buscarProdutosExistentes();
+});
+
+
+// ESCONDER SUGESTÕES AO CLICAR FORA
+document.addEventListener("click", function(event) {
+    if (!event.target.closest(".campo-nome")) {
+        sugestoesProdutos.classList.remove("ativo");
+    }
 });
 
 
@@ -130,25 +185,46 @@ formProduto.addEventListener("submit", function(event) {
     const preco = Number(campoPreco.value);
     const quantidade = Number(campoQuantidade.value);
 
+    esconderMensagem();
+
     // VALIDAR NOME
-    if (!nome) {
-        alert("Por favor, informe um nome válido para o produto.");
+    if (nome === "") {
+        mostrarMensagem(
+            "Por favor, informe o nome do produto.",
+            "erro"
+        );
+
         campoNome.focus();
         return;
     }
 
-    // VALIDAR PREÇO E QUANTIDADE
+    // VALIDAR PREÇO
     if (
         campoPreco.value.trim() === "" ||
         !Number.isFinite(preco) ||
-        preco <= 0 ||
+        preco <= 0
+    ) {
+        mostrarMensagem(
+            "O preço deve ser um número maior que zero.",
+            "erro"
+        );
+
+        campoPreco.focus();
+        return;
+    }
+
+    // VALIDAR QUANTIDADE
+    if (
         campoQuantidade.value.trim() === "" ||
         !Number.isInteger(quantidade) ||
         quantidade <= 0
     ) {
-        alert(
-            "O preço deve ser maior que zero e a quantidade deve ser um número inteiro maior que zero."
+        mostrarMensagem(
+            "A quantidade deve ser um número inteiro maior que zero.",
+            "erro"
         );
+
+        campoQuantidade.focus();
         return;
     }
 
@@ -157,36 +233,65 @@ formProduto.addEventListener("submit", function(event) {
     // MODO CADASTRO
     if (indiceEdicao === null) {
 
-        // VERIFICAR SE O PRODUTO JÁ EXISTE
         const produtoExistente = listaDeProdutos.findIndex(produto =>
             produto.nome.trim().toLowerCase() === nome.toLowerCase()
         );
 
         if (produtoExistente !== -1) {
-            alert(
-                "Esse produto já está cadastrado. Selecione-o nas sugestões para editar."
+            prepararEdicao(produtoExistente);
+
+            mostrarMensagem(
+                "Esse produto já existe. Os dados foram carregados para edição.",
+                "aviso"
             );
 
-            prepararEdicao(produtoExistente);
             return;
         }
 
         listaDeProdutos.push(novoProduto);
 
-        alert("Produto cadastrado com sucesso!");
+        salvarProdutos();
+
+        cancelarEdicao();
+
+        renderizarTabela();
+
+        mostrarMensagem(
+            "Produto cadastrado com sucesso!",
+            "sucesso"
+        );
 
     } else {
 
         // MODO EDIÇÃO
+        const nomeDuplicado = listaDeProdutos.some((produto, index) =>
+            index !== indiceEdicao &&
+            produto.nome.trim().toLowerCase() === nome.toLowerCase()
+        );
+
+        if (nomeDuplicado) {
+            mostrarMensagem(
+                "Já existe outro produto com esse nome.",
+                "erro"
+            );
+
+            campoNome.focus();
+            return;
+        }
+
         listaDeProdutos[indiceEdicao] = novoProduto;
 
-        alert("Produto atualizado com sucesso!");
+        salvarProdutos();
+
+        cancelarEdicao();
+
+        renderizarTabela();
+
+        mostrarMensagem(
+            "Produto atualizado com sucesso!",
+            "sucesso"
+        );
     }
-
-    salvarProdutos();
-
-    cancelarEdicao();
-    renderizarTabela();
 });
 
 
@@ -195,16 +300,14 @@ function prepararEdicao(index) {
     const produto = listaDeProdutos[index];
 
     if (!produto) {
-        alert("Produto não encontrado.");
+        mostrarMensagem("Produto não encontrado.", "erro");
         return;
     }
 
-    // PREENCHER CAMPOS COM OS DADOS EXISTENTES
     campoNome.value = produto.nome;
     campoPreco.value = produto.preco;
     campoQuantidade.value = produto.quantidade;
 
-    // ATIVAR MODO EDIÇÃO
     indiceEdicao = index;
 
     btnAdicionar.textContent = "Salvar alterações";
@@ -212,6 +315,8 @@ function prepararEdicao(index) {
 
     sugestoesProdutos.innerHTML = "";
     sugestoesProdutos.classList.remove("ativo");
+
+    esconderMensagem();
 
     campoPreco.focus();
 }
@@ -234,35 +339,121 @@ function cancelarEdicao() {
 // EVENTO DO BOTÃO CANCELAR
 btnCancelarEdicao.addEventListener("click", function() {
     cancelarEdicao();
+    esconderMensagem();
+});
+
+
+// ABRIR MODAL PERSONALIZADO
+function abrirModal(titulo, texto, tipo, funcaoConfirmar) {
+    modalTitulo.textContent = titulo;
+    modalTexto.textContent = texto;
+
+    acaoPendente = funcaoConfirmar;
+
+    if (tipo === "conceito") {
+        modalIcone.textContent = "NT";
+        modalIcone.className = "modal-icone modal-icone-conceito";
+
+        btnModalCancelar.hidden = true;
+        btnModalConfirmar.textContent = "Entendi";
+        btnModalConfirmar.classList.add("btn-modal-conceito");
+
+    } else {
+        modalIcone.textContent = "!";
+        modalIcone.className = "modal-icone modal-icone-alerta";
+
+        btnModalCancelar.hidden = false;
+        btnModalConfirmar.textContent = "Confirmar";
+        btnModalConfirmar.classList.remove("btn-modal-conceito");
+    }
+
+    modalOverlay.classList.add("ativo");
+    modalOverlay.setAttribute("aria-hidden", "false");
+
+    btnModalConfirmar.focus();
+}
+
+
+// FECHAR MODAL
+function fecharModal() {
+    modalOverlay.classList.remove("ativo");
+    modalOverlay.setAttribute("aria-hidden", "true");
+
+    acaoPendente = null;
+}
+
+
+// BOTÃO CANCELAR DO MODAL
+btnModalCancelar.addEventListener("click", function() {
+    fecharModal();
+});
+
+
+// BOTÃO CONFIRMAR DO MODAL
+btnModalConfirmar.addEventListener("click", function() {
+    const acao = acaoPendente;
+
+    fecharModal();
+
+    if (typeof acao === "function") {
+        acao();
+    }
+});
+
+
+// FECHAR MODAL AO CLICAR FORA DA JANELA
+modalOverlay.addEventListener("click", function(event) {
+    if (event.target === modalOverlay) {
+        fecharModal();
+    }
+});
+
+
+// FECHAR MODAL COM ESC
+document.addEventListener("keydown", function(event) {
+    if (
+        event.key === "Escape" &&
+        modalOverlay.classList.contains("ativo")
+    ) {
+        fecharModal();
+    }
 });
 
 
 // REMOVER PRODUTO
 function removerProduto(index) {
-    if (!listaDeProdutos[index]) {
+    const produto = listaDeProdutos[index];
+
+    if (!produto) {
         return;
     }
 
-    const confirmar = confirm(
-        `Deseja remover o produto "${listaDeProdutos[index].nome}"?`
+    abrirModal(
+        "Excluir produto",
+        `Tem certeza de que deseja excluir "${produto.nome}" do estoque? Essa ação não poderá ser desfeita.`,
+        "confirmacao",
+        function() {
+            listaDeProdutos.splice(index, 1);
+
+            if (indiceEdicao === index) {
+                cancelarEdicao();
+
+            } else if (
+                indiceEdicao !== null &&
+                indiceEdicao > index
+            ) {
+                indiceEdicao--;
+            }
+
+            salvarProdutos();
+            renderizarTabela();
+
+            mostrarMensagem(
+                "Produto removido com sucesso!",
+                "sucesso"
+            );
+        }
     );
-
-    if (!confirmar) {
-        return;
-    }
-
-    listaDeProdutos.splice(index, 1);
-
-    // AJUSTAR MODO DE EDIÇÃO
-    if (indiceEdicao === index) {
-        cancelarEdicao();
-
-    } else if (indiceEdicao !== null && indiceEdicao > index) {
-        indiceEdicao--;
-    }
-
-    salvarProdutos();
-    renderizarTabela();
 }
 
 
@@ -288,10 +479,7 @@ function atualizarValorTotal(produtosVisiveis) {
         0
     );
 
-    valorTotal.textContent = total.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-    });
+    valorTotal.textContent = formatarMoeda(total);
 }
 
 
@@ -301,7 +489,6 @@ function renderizarTabela() {
 
     const produtosVisiveis = obterProdutosFiltrados();
 
-    // VERIFICAR SE EXISTEM PRODUTOS
     if (produtosVisiveis.length === 0) {
         const linha = document.createElement("tr");
         const celula = document.createElement("td");
@@ -319,7 +506,6 @@ function renderizarTabela() {
 
     } else {
 
-        // MOSTRAR PRODUTOS FILTRADOS
         produtosVisiveis.forEach(item => {
             const produto = item.produto;
             const index = item.index;
@@ -328,29 +514,17 @@ function renderizarTabela() {
 
             const valores = [
                 produto.nome,
-
-                Number(produto.preco).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL"
-                }),
-
+                formatarMoeda(produto.preco),
                 produto.quantidade,
-
-                (
+                formatarMoeda(
                     Number(produto.preco) *
                     Number(produto.quantidade)
-                ).toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL"
-                })
+                )
             ];
 
-            // CRIAR CÉLULAS
             valores.forEach(valor => {
                 const celula = document.createElement("td");
-
                 celula.textContent = valor;
-
                 linha.appendChild(celula);
             });
 
@@ -380,14 +554,12 @@ function renderizarTabela() {
             });
 
             celulaAcoes.append(btnEditar, btnRemover);
-
             linha.appendChild(celulaAcoes);
 
             tabelaProdutos.appendChild(linha);
         });
     }
 
-    // ATUALIZAR TOTAL
     atualizarValorTotal(produtosVisiveis);
 }
 
@@ -401,21 +573,45 @@ campoBusca.addEventListener("input", function() {
 // LIMPAR TODO O ESTOQUE
 btnLimpar.addEventListener("click", function() {
     if (listaDeProdutos.length === 0) {
-        alert("O estoque já está vazio.");
+        mostrarMensagem(
+            "O estoque já está vazio.",
+            "aviso"
+        );
+
         return;
     }
 
-    if (confirm("Tem certeza de que deseja limpar todo o estoque?")) {
+    abrirModal(
+        "Limpar todo o estoque",
+        "Tem certeza de que deseja excluir todos os produtos cadastrados? Essa ação não poderá ser desfeita.",
+        "confirmacao",
+        function() {
+            listaDeProdutos = [];
 
-        listaDeProdutos = [];
+            cancelarEdicao();
 
-        cancelarEdicao();
+            campoBusca.value = "";
 
-        campoBusca.value = "";
+            salvarProdutos();
+            renderizarTabela();
 
-        salvarProdutos();
-        renderizarTabela();
-    }
+            mostrarMensagem(
+                "Todo o estoque foi limpo com sucesso!",
+                "sucesso"
+            );
+        }
+    );
+});
+
+
+// MODAL EXPLICANDO O CONCEITO BOOTSTRAP
+btnBootstrap.addEventListener("click", function() {
+    abrirModal(
+        "Conceito Bootstrap",
+        "O Bootstrap é uma biblioteca CSS que oferece componentes prontos, como botões, formulários, tabelas e janelas modais. No projeto Nova Texas, poderíamos utilizá-lo para acelerar a criação da interface, padronizar os elementos visuais e facilitar a adaptação do sistema para diferentes tamanhos de tela. Nesta versão, desenvolvemos os estilos e os modais com CSS e JavaScript próprios, aplicando conceitos semelhantes de organização e experiência do usuário.",
+        "conceito",
+        null
+    );
 });
 
 
